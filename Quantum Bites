@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quantum Bites — Masuk ke Dimensi Quantum</title>
+  <style>
+    :root{
+      --yellow:#FFE58A;
+      --portal:#0f172a;
+      --accent:#6b2f1f;
+      --card-bg:#fff5ee;
+      --shadow: rgba(11,11,11,0.12);
+      --glass: rgba(255,255,255,0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: linear-gradient(180deg,var(--yellow), #ffd966 120%);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* Center stage */
+    .stage{
+      height:100vh;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    /* Initial card with Masuk */
+    .enter-wrap{
+      text-align:center;
+      z-index:5;
+      transition:opacity .6s ease, transform .6s ease;
+    }
+    .brand{
+      font-weight:700;
+      letter-spacing:1px;
+      margin-bottom:10px;
+      color: #4b2a1a;
+      font-size:22px;
+    }
+    .masuk-btn{
+      display:inline-block;
+      padding:18px 36px;
+      border-radius:40px;
+      background: linear-gradient(180deg,#fff,#ffe6c2);
+      border: 3px solid rgba(0,0,0,0.08);
+      box-shadow: 0 10px 25px var(--shadow);
+      font-weight:700;
+      cursor:pointer;
+      font-size:18px;
+      color:#4b2a1a;
+      transition: transform .18s ease, box-shadow .18s ease;
+      user-select:none;
+    }
+    .masuk-btn:active{ transform: translateY(2px) scale(.995); box-shadow:0 6px 15px rgba(0,0,0,0.08); }
+
+    /* Portal */
+    .portal{
+      position:absolute;
+      width:300px;
+      height:300px;
+      border-radius:50%;
+      left:50%;
+      top:50%;
+      transform: translate(-50%,-50%) scale(0);
+      background: radial-gradient(circle at 30% 30%, #0b1222 0%, #071028 25%, #071b2f 50%, #00101a 100%);
+      box-shadow: 0 0 80px rgba(5,10,30,0.6), inset 0 0 40px rgba(120,180,255,0.06);
+      z-index:4;
+      transition: transform .9s cubic-bezier(.2,.9,.24,1), opacity .6s ease;
+      overflow:visible;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .portal.open{ transform: translate(-50%,-50%) scale(8); }
+
+    /* crack lines for retakan effect */
+    .crack{
+      position:absolute;
+      width:14px;
+      height:120vh;
+      background: linear-gradient(180deg, transparent, rgba(80,40,20,0.18) 40%, rgba(255,255,255,0.05) 60%, transparent 100%);
+      top:-10vh;
+      left:50%;
+      transform-origin: center;
+      opacity:0;
+      z-index:6;
+      pointer-events:none;
+    }
+    /* several rotated cracks */
+    .crack.c1{ transform: translateX(-50%) rotate(0deg); }
+    .crack.c2{ transform: translateX(-50%) rotate(28deg); }
+    .crack.c3{ transform: translateX(-50%) rotate(-26deg); }
+    .crack.c4{ transform: translateX(-50%) rotate(58deg); }
+    .crack.c5{ transform: translateX(-50%) rotate(-58deg); }
+
+    .crack.show{ animation: crackFade .9s ease forwards; }
+    @keyframes crackFade{
+      0%{ opacity:0; transform: translateY(-30px) scaleY(.3) translateX(-50%); }
+      30%{ opacity:1; transform: translateY(0) scaleY(1) translateX(-50%); }
+      100%{ opacity:1; transform: translateY(0) scaleY(1) translateX(-50%); }
+    }
+
+    /* Particles inside portal */
+    .particles{
+      position:absolute;
+      width:80%;
+      height:80%;
+      border-radius:50%;
+      z-index:7;
+      pointer-events:none;
+      mix-blend-mode:screen;
+      opacity:0.9;
+      filter: blur(6px);
+    }
+    .particle{
+      position:absolute;
+      width:8px;height:8px;border-radius:50%; background: rgba(255,255,255,0.9);
+      box-shadow: 0 0 12px rgba(120,200,255,.8);
+      opacity:0; transform:translate3d(0,0,0) scale(.6);
+      animation: floatUp 3s linear infinite;
+    }
+    .particle.p1{ left:20%; top:60%; animation-delay:.1s; }
+    .particle.p2{ left:40%; top:30%; animation-delay:.6s; }
+    .particle.p3{ left:70%; top:50%; animation-delay:1s; }
+    .particle.p4{ left:55%; top:70%; animation-delay:1.6s; }
+    .particle.p5{ left:30%; top:40%; animation-delay:2s; }
+
+    @keyframes floatUp{
+      0%{ opacity:0; transform: translateY(10px) scale(.6); }
+      20%{ opacity:1; transform: translateY(-6px) scale(1); }
+      100%{ opacity:0; transform: translateY(-60px) scale(.5); }
+    }
+
+    /* Content after portal open */
+    .content{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      z-index:8;
+      opacity:0;
+      transition: opacity .6s ease .6s;
+    }
+    .content.show{ pointer-events:auto; opacity:1; }
+
+    .scene{
+      width:92%;
+      max-width:1100px;
+      min-height:60vh;
+      background: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+      border-radius:18px;
+      box-shadow: 0 20px 60px rgba(10,10,20,0.18);
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:20px;
+      padding:24px;
+      align-items:start;
+      transform: translateY(20px);
+      transition: transform .6s ease;
+    }
+
+    .scene.show{ transform: translateY(0); }
+
+    /* Left: maskot panel */
+    .guide{
+      background: linear-gradient(180deg,#fff,#fff4ea);
+      padding:18px;
+      border-radius:14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      position:relative;
+    }
+    .maskot{
+      width:120px;height:120px;border-radius:12px; overflow:hidden; flex:0 0 120px;
+      border: 3px solid rgba(0,0,0,0.06);
+    }
+    .maskot img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    .speech{
+      background: linear-gradient(180deg,#fff,#fffafd);
+      border-radius:12px;
+      padding:12px 14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+      font-size:14px;
+      color:#3a2a22;
+      line-height:1.35;
+      flex:1;
+      min-height:78px;
+      position:relative;
+    }
+    .speech:after{
+      content:''; position:absolute; left:12px; bottom:-8px; width:0;height:0;
+      border-left:10px solid transparent; border-right:10px solid transparent;
+      border-top:10px solid #fff;
+    }
+    .brand-title{ font-weight:800; font-size:20px; color: #361f16; margin-bottom:6px; }
+
+    /* Right: menu cards */
+    .menu{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap:16px;
+      align-content:start;
+    }
+    .card{
+      background: var(--card-bg);
+      padding:12px;
+      border-radius:12px;
+      box-shadow: 0 8px 20px rgba(20,20,20,0.06);
+      border:1px solid rgba(0,0,0,0.04);
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .card:active{ transform: translateY(4px) scale(.995); }
+    .card .thumb{
+      width:56px;height:56px;border-radius:8px;background: linear-gradient(180deg,#c77b51,#7b3b2a);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
+      font-size:12px;
+      box-shadow: inset 0 -6px 18px rgba(0,0,0,0.12);
+    }
+    .card .info{ flex:1; }
+    .card .title{ font-weight:700; color:#3b2a22; font-size:14px; }
+    .card .desc{ font-size:12px; color:#6b4f44; margin-top:6px; opacity:.9; }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background: rgba(3,6,12,0.45); display:flex; align-items:center; justify-content:center;
+      z-index:2000; opacity:0; pointer-events:none; transition: opacity .18s ease;
+    }
+    .modal-backdrop.show{ opacity:1; pointer-events:auto; }
+    .modal{
+      width:92%; max-width:520px; background:#fff; border-radius:12px; padding:18px; box-shadow:0 30px 80px rgba(0,0,0,0.3);
+    }
+    .modal h3{ margin:0 0 8px 0; color:#341f16; }
+    .modal p{ margin:0 0 16px 0; color:#5d4439; }
+    .btn{
+      display:inline-block; padding:10px 14px; border-radius:10px; background:#ffe8c8; border:0; font-weight:700; cursor:pointer;
+    }
+
+    /* small screens */
+    @media (max-width:880px){
+      .scene{ grid-template-columns: 1fr; padding:18px; }
+      .maskot{ width:92px; height:92px; flex:0 0 92px; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="stage" role="main" aria-live="polite">
+    <!-- initial enter -->
+    <div class="enter-wrap" id="enterWrap" aria-hidden="false">
+      <div class="brand">Quantum Bites</div>
+      <button id="masukBtn" class="masuk-btn">MASUK</button>
+      <div style="margin-top:12px; color:#5b3f33; font-size:13px">Masuki portal ke dimensi quantum 🍫</div>
+    </div>
+
+    <!-- cracks -->
+    <div class="crack c1" id="cr1"></div>
+    <div class="crack c2" id="cr2"></div>
+    <div class="crack c3" id="cr3"></div>
+    <div class="crack c4" id="cr4"></div>
+    <div class="crack c5" id="cr5"></div>
+
+    <!-- portal -->
+    <div class="portal" id="portal" aria-hidden="true">
+      <div class="particles" aria-hidden="true">
+        <div class="particle p1"></div>
+        <div class="particle p2"></div>
+        <div class="particle p3"></div>
+        <div class="particle p4"></div>
+        <div class="particle p5"></div>
+      </div>
+    </div>
+
+    <!-- content -->
+    <div class="content" id="content" aria-hidden="true">
+      <div class="scene" id="scene">
+        <!-- left: maskot + speech -->
+        <div class="guide">
+          <div class="maskot" role="img" aria-label="Maskot Quantum Bites">
+            <!-- set image maskot.png di folder yang sama -->
+            <img src="maskot.png" alt="Maskot Quantum Bites">
+          </div>
+          <div>
+            <div class="brand-title">Quantum Bites</div>
+            <div class="speech" id="speech">Halo! Aku si Brownie — pemandu kamu di dimensi Quantum. Pilih menu brownies-mu, aku akan bantu rekomendasi. 🍫</div>
+          </div>
+        </div>
+
+        <!-- right: menu cards -->
+        <div class="menu" id="menu" aria-live="polite">
+          <!-- cards generated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- modal -->
+    <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal" id="modal">
+        <h3 id="modalTitle">Judul</h3>
+        <p id="modalDesc">Deskripsi</p>
+        <div style="text-align:right">
+          <button class="btn" id="closeModal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data menu
+    const menuData = [
+      { id:'original', title:'Original Brownies', desc:'Rasa klasik, tekstur lembut & legit—resep warisan.' },
+      { id:'cheese', title:'Cheese Brownies', desc:'Perpaduan brownies lembut dan lapisan keju gurih.' },
+      { id:'double', title:'Double Choco Brownies', desc:'Coklat intens plus potongan choco ekstra.' },
+      { id:'nutella', title:'Nutella Brownies', desc:'Isian Nutella lumer di tengah yang bikin nagih.' },
+      { id:'mix', title:'Mix Brownies', desc:'Kombinasi potongan rasa—coklat, keju, dan kacang.' }
+    ];
+
+    const masukBtn = document.getElementById('masukBtn');
+    const portal = document.getElementById('portal');
+    const enterWrap = document.getElementById('enterWrap');
+    const cracks = ['cr1','cr2','cr3','cr4','cr5'].map(id => document.getElementById(id));
+    const content = document.getElementById('content');
+    const scene = document.getElementById('scene');
+    const menuEl = document.getElementById('menu');
+    const speech = document.getElementById('speech');
+
+    // modal
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const closeModal = document.getElementById('closeModal');
+
+    // create cards
+    function renderMenu(){
+      menuData.forEach(item=>{
+        const card = document.createElement('button');
+        card.className = 'card';
+        card.setAttribute('data-id', item.id);
+        card.setAttribute('aria-label', item.title);
+        card.innerHTML = `
+          <div class="thumb">${item.title.split(' ')[0].slice(0,2).toUpperCase()}</div>
+          <div class="info">
+            <div class="title">${item.title}</div>
+            <div class="desc">${item.desc}</div>
+          </div>
+        `;
+        card.addEventListener('click', ()=> openModal(item));
+        menuEl.appendChild(card);
+      });
+    }
+
+    function openModal(item){
+      modalTitle.textContent = item.title;
+      modalDesc.textContent = item.desc + " — Pesan via kontak toko (dummy).";
+      modalBackdrop.classList.add('show');
+      modalBackdrop.setAttribute('aria-hidden','false');
+      // guided maskot message update
+      speak(${item.title} dipilih! Ini pilihan yang enak. Mau rekomendasi topping? Klik Tutup untuk balik.)
+    }
+
+    closeModal.addEventListener('click', ()=>{
+      modalBackdrop.classList.remove('show');
+      modalBackdrop.setAttribute('aria-hidden','true');
+      speak('Silakan pilih menu lain kalau mau. Aku selalu di sini! 🍫');
+    });
+
+    // speech simulation: show text with small animation
+    let speechTimer = null;
+    function speak(text){
+      if(speechTimer) clearTimeout(speechTimer);
+      speech.style.opacity = 0;
+      setTimeout(()=> {
+        speech.textContent = text;
+        speech.style.opacity = 1;
+      }, 180);
+      // optional: revert to default after some time
+      speechTimer = setTimeout(()=> {
+        speech.style.opacity = 0;
+        setTimeout(()=> speech.textContent = 'Pilih menu brownies-mu, aku siap bantu rekomendasi.' ,180);
+        setTimeout(()=> speech.style.opacity = 1, 380);
+      }, 4200);
+    }
+
+    // Play the portal opening sequence
+    function openPortalSequence(){
+      // hide enter
+      enterWrap.style.opacity = 0;
+      enterWrap.style.transform = 'scale(.98)';
+      enterWrap.setAttribute('aria-hidden','true');
+
+      // show cracks
+      cracks.forEach((c, i) => {
+        setTimeout(()=> c.classList.add('show'), i*90);
+      });
+
+      // animate portal expand
+      setTimeout(()=>{
+        portal.classList.add('open');
+        portal.setAttribute('aria-hidden','false');
+      }, 420);
+
+      // show content
+      setTimeout(()=>{
+        content.classList.add('show');
+        scene.classList.add('show');
+        renderMenu();
+        // maskot greeting appear
+        speak('Selamat datang di dimensi Quantum — aku si Brownie, pemandu kamu! 👋');
+      }, 1200);
+    }
+
+    masukBtn.addEventListener('click', ()=> {
+      // prevent double
+      if(portal.classList.contains('open')) return;
+      openPortalSequence();
+    });
+
+    // close modal on backdrop click (but not when inside modal)
+    modalBackdrop.addEventListener('click', (e)=>{
+      if(e.target === modalBackdrop){
+        closeModal.click();
+      }
+    });
+
+    // keyboard accessibility: Enter on masuk
+    masukBtn.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        masukBtn.click();
+      }
+    });
+
+    // initial focus
+    window.addEventListener('load', ()=> {
+      masukBtn.focus();
+    });
+  </script>
+</body>
+</html>
